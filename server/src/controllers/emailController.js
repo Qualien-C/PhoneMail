@@ -39,4 +39,25 @@ const sendEmail = async (req, res) => {
   }
 };
 
-module.exports = { sendEmail };
+const getEmails = async (req, res) => {
+  try {
+    const phoneNumber = req.user.phoneNumber;
+
+    const emails = await Email.find({
+      recipients: phoneNumber
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      emails
+    });
+
+  } catch (error) {
+    console.error("Get emails error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch emails"
+    });
+  }
+};
+
+module.exports = { sendEmail, getEmails };
