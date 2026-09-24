@@ -26,7 +26,7 @@ body {
 /* Header */
 
 h1 {
-  margin: 0 0 60px;
+  margin: 0 0 38px;
 
   font-size: 28px;
   font-weight: bold;
@@ -71,7 +71,7 @@ h2 {
 
   padding: 14px 16px;
 
-  border: 1px solid #dadce0;
+  border: 2px solid #dadce0;
   border-radius: 6px;
 
   background: #ffffff;
@@ -91,7 +91,7 @@ h2 {
 }
 
 .language.selected {
-  border-color: #1a73e8;
+  border-color: #8d78e2;
   background: #f8fbff;
 }
 
@@ -109,18 +109,18 @@ h2 {
   border: none;
   border-radius: 4px;
 
-  background: #1a73e8;
+  background: #5741b0;
   color: #ffffff;
 
   font-family: inherit;
   font-size: 15px;
   font-weight: 500;
-
+  transition: all 200ms;
   cursor: pointer;
 }
 
 .continue-button:hover {
-  background: #1765cc;
+  background: #6148c7;
 }
 
 .step {
