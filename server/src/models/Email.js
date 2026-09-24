@@ -35,15 +35,20 @@ const emailSchema = new mongoose.Schema(
       required: true
     },
 
-    // isRead: {
-    //   type: Boolean,
-    //   default: false
-    // },
+    isRead: {
+      type: Boolean,
+      default: false
+    },
 
-    // isFavorite: {
-    //   type: Boolean,
-    //   default: false
-    // },
+    isFavorite: {
+      type: Boolean,
+      default: false
+    },
+
+    hasReplied: {
+      type: Boolean,
+      default: false
+    },
 
     folder: {
       type: String,
