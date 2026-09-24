@@ -1,8 +1,15 @@
 const Email = require("../models/Email");
+const User = require("../models/User");
 
 const sendEmail = async (req, res) => {
   try {
-    const { recipients, cc, subject, body, threadId } = req.body;
+    const {
+      recipients,
+      cc,
+      subject,
+      body,
+      threadId
+    } = req.body;
 
     if (!recipients || recipients.length === 0) {
       return res.status(400).json({
@@ -16,9 +23,42 @@ const sendEmail = async (req, res) => {
       });
     }
 
+    //! This syntax from gpt ask 
+    const uniqueRecipients = [...new Set(recipients)];
+
+    const users = await User.find(
+      {
+        phoneNumber: {
+          //!! for scalability, you can add all phonenumbers into an array, and try to return their profile. this is just a prototype, so we are doing this
+          // TODO :
+          $in: uniqueRecipients
+        }
+      },
+      {
+        phoneNumber: 1
+      }
+    );
+
+    
+    const registeredNumbers = new Set(
+      users.map(user => user.phoneNumber)
+    );
+
+    
+    const invalidRecipients = uniqueRecipients.filter(
+      number => !registeredNumbers.has(number)
+    );
+
+    if (invalidRecipients.length > 0) {
+      return res.status(400).json({
+        message: "This (or) Some of these recipients are not registered on PhoneMail",
+        invalidRecipients
+      });
+    }
+
     const email = await Email.create({
       sender: req.user.phoneNumber,
-      recipients,
+      recipients: uniqueRecipients,
       cc: cc || [],
       subject: subject || "",
       body,
@@ -42,12 +82,25 @@ const sendEmail = async (req, res) => {
 const getEmails = async (req, res) => {
   try {
     const phoneNumber = req.user.phoneNumber;
+    const { filter } = req.query;
 
-    const emails = await Email.find({
+    let query = {
       recipients: phoneNumber
-    }).sort({ createdAt: -1 });
+    };
+
+    if (filter === "unread") {
+      query.isRead = false;
+    }
+
+    if (filter === "favorites") {
+      query.isFavorite = true;
+    }
+
+    const emails = await Email.find(query)
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
+      filter: filter || "all",
       emails
     });
 
@@ -202,5 +255,303 @@ const markAsRead = async (req, res) => {
 };
 
 
+const toggleFavorite = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-module.exports = { sendEmail, getEmails, getEmailById, getConversation, replyToEmail, markAsRead };
+    const email = await Email.findById(id);
+
+    if (!email) {
+      return res.status(404).json({
+        message: "Email not found"
+      });
+    }
+
+    // ? THIS IS THE HIGHLIGHT. THIS IS A FREAKING TOGGLE :O
+    email.isFavorite = !email.isFavorite;
+
+    await email.save();
+
+    res.status(200).json({
+      message: email.isFavorite
+        ? "Email added to favorites"
+        : "Email removed from favorites",
+      email
+    });
+
+  } catch (error) {
+    console.error("Toggle favorite error:", error);
+
+    res.status(500).json({
+      message: "Failed to update favorite"
+    });
+  }
+};
+
+
+const getSentEmails = async (req, res) => {
+  try {
+    const phoneNumber = req.user.phoneNumber;
+
+    const emails = await Email.find({
+      sender: phoneNumber
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      emails
+    });
+
+  } catch (error) {
+    console.error("Get sent emails error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch sent emails"
+    });
+  }
+};
+
+
+
+const createDraft = async (req, res) => {
+  try {
+    const {
+      recipients,
+      cc,
+      subject,
+      body
+    } = req.body;
+
+    const draft = await Email.create({
+      sender: req.user.phoneNumber,
+      recipients: recipients || [],
+      cc: cc || [],
+      subject: subject || "",
+      body: body || "",
+      threadId: Date.now().toString(),
+      folder: "draft"
+    });
+
+    res.status(201).json({
+      message: "Draft saved successfully",
+      draft
+    });
+
+  } catch (error) {
+    console.error("Create draft error:", error);
+
+    res.status(500).json({
+      message: "Failed to save draft"
+    });
+  }
+};
+
+
+const getDrafts = async (req, res) => {
+  try {
+    const phoneNumber = req.user.phoneNumber;
+
+    const drafts = await Email.find({
+      sender: phoneNumber,
+      folder: "draft"
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      drafts
+    });
+
+  } catch (error) {
+    console.error("Get drafts error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch drafts"
+    });
+  }
+};
+
+
+
+const moveToTrash = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const email = await Email.findById(id);
+
+    if (!email) {
+      return res.status(404).json({
+        message: "Email not found"
+      });
+    }
+
+    email.folder = "trash";
+
+    await email.save();
+
+    res.status(200).json({
+      message: "Email moved to trash",
+      email
+    });
+
+  } catch (error) {
+    console.error("Move to trash error:", error);
+
+    res.status(500).json({
+      message: "Failed to move email to trash"
+    });
+  }
+};
+
+
+
+
+const getTrash = async (req, res) => {
+  try {
+    const phoneNumber = req.user.phoneNumber;
+
+    const emails = await Email.find({
+      recipients: phoneNumber,
+      folder: "trash"
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      emails
+    });
+
+  } catch (error) {
+    console.error("Get trash error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch trash"
+    });
+  }
+};
+
+
+
+const moveToSpam = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const email = await Email.findById(id);
+
+    if (!email) {
+      return res.status(404).json({
+        message: "Email not found"
+      });
+    }
+
+    email.folder = "spam";
+
+    await email.save();
+
+    res.status(200).json({
+      message: "Email moved to spam",
+      email
+    });
+
+  } catch (error) {
+    console.error("Move to spam error:", error);
+
+    res.status(500).json({
+      message: "Failed to move email to spam"
+    });
+  }
+};
+
+
+
+const getSpam = async (req, res) => {
+  try {
+    const phoneNumber = req.user.phoneNumber;
+
+    const emails = await Email.find({
+      recipients: phoneNumber,
+      folder: "spam"
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      emails
+    });
+
+  } catch (error) {
+    console.error("Get spam error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch spam"
+    });
+  }
+};
+
+
+const restoreEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const email = await Email.findById(id);
+
+    if (!email) {
+      return res.status(404).json({
+        message: "Email not found"
+      });
+    }
+
+    if (email.folder !== "trash" && email.folder !== "spam") {
+      return res.status(400).json({
+        message: "Only emails in trash or spam can be restored"
+      });
+    }
+
+    email.folder = "inbox";
+
+    await email.save();
+
+    res.status(200).json({
+      message: "Email restored successfully",
+      email
+    });
+
+  } catch (error) {
+    console.error("Restore email error:", error);
+
+    res.status(500).json({
+      message: "Failed to restore email"
+    });
+  }
+};
+
+
+const permanentlyDeleteEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const email = await Email.findById(id);
+
+    if (!email) {
+      return res.status(404).json({
+        message: "Email not found"
+      });
+    }
+
+    if (email.folder !== "trash") {
+      return res.status(400).json({
+        message: "Only emails in trash can be permanently deleted"
+      });
+    }
+
+    await Email.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Email permanently deleted"
+    });
+
+  } catch (error) {
+    console.error("Permanent delete error:", error);
+
+    res.status(500).json({
+      message: "Failed to permanently delete email"
+    });
+  }
+};
+
+
+
+module.exports = { sendEmail, getEmails, getEmailById, getConversation, replyToEmail, markAsRead, toggleFavorite, getSentEmails, createDraft, getDrafts, moveToTrash, getTrash, moveToSpam, getSpam, restoreEmail, permanentlyDeleteEmail };
