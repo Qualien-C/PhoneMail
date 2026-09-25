@@ -10,7 +10,7 @@ const protect = (req, res, next) => {
       });
     }
 
-    // why? CUZ BEARER zxncio3789aHFUhsiad, split and get the second part
+    //? why? CUZ BEARER zxncio3789aHFUhsiad, split and get the second part
     const token = authHeader.split(" ")[1];
 
     if (!token) {
