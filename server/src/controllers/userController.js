@@ -33,7 +33,7 @@ const updateMe = async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       req.user.userId,
-      {name},
+      { name },
       {
         new: true,
         runValidators: true
@@ -60,6 +60,49 @@ const updateMe = async (req, res) => {
   }
 };
 
-module.exports = {
-  getMe, updateMe
+
+const searchUser = async (req, res) => {
+  try {
+    const { phoneNumber } = req.query;
+
+    if (!phoneNumber) {
+      return res.status(400).json({
+        message: "Phone number is required"
+      });
+    }
+
+    const user = await User.findOne(
+      {
+        phoneNumber
+      },
+      {
+        phoneNumber: 1,
+        emailId: 1,
+        name: 1,
+        profilePicture: 1
+      }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "PhoneMail user not found"
+      });
+    }
+
+    res.status(200).json({
+      user
+    });
+
+  } catch (error) {
+    console.error("Search user error:", error);
+
+    res.status(500).json({
+      message: "Failed to search user"
+    });
+  }
 };
+
+
+
+
+module.exports = { getMe, updateMe, searchUser };

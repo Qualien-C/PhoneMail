@@ -39,12 +39,12 @@ const sendEmail = async (req, res) => {
       }
     );
 
-    
+
     const registeredNumbers = new Set(
       users.map(user => user.phoneNumber)
     );
 
-    
+
     const invalidRecipients = uniqueRecipients.filter(
       number => !registeredNumbers.has(number)
     );
@@ -62,7 +62,8 @@ const sendEmail = async (req, res) => {
       cc: cc || [],
       subject: subject || "",
       body,
-      threadId: threadId || Date.now().toString()
+      threadId: threadId || Date.now().toString(),
+      folder: "sent"
     });
 
     res.status(201).json({
@@ -142,16 +143,27 @@ const getEmailById = async (req, res) => {
 const getConversation = async (req, res) => {
   try {
     const { threadId } = req.params;
+    const phoneNumber = req.user.phoneNumber;
+
+    //!! First check whether the user belongs to this conversation
+    const userEmail = await Email.findOne({
+      threadId,
+      $or: [
+        { sender: phoneNumber },
+        { recipients: phoneNumber },
+        { cc: phoneNumber }
+      ]
+    });
+
+    if (!userEmail) {
+      return res.status(403).json({
+        message: "You are not allowed to access this conversation"
+      });
+    }
 
     const emails = await Email.find({
       threadId
     }).sort({ createdAt: 1 });
-
-    if (emails.length === 0) {
-      return res.status(404).json({
-        message: "Conversation not found"
-      });
-    }
 
     res.status(200).json({
       emails
@@ -294,7 +306,8 @@ const getSentEmails = async (req, res) => {
     const phoneNumber = req.user.phoneNumber;
 
     const emails = await Email.find({
-      sender: phoneNumber
+      sender: phoneNumber,
+      folder: "sent"
     }).sort({ createdAt: -1 });
 
     res.status(200).json({
