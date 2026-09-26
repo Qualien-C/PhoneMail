@@ -1,12 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: #ffffff;
   color: #202124;
 }
@@ -23,66 +21,47 @@ body {
   padding: 80px 24px 40px;
 }
 
-/* Header */
-
 h1 {
-  margin: 0 0 38px;
-
+  margin: 0 0 60px;
   font-size: 28px;
-  font-weight: bold;
-
-  color: #202124; 
+  font-weight: 500;
+  color: #202124;
 }
 
 h2 {
   margin: 0 0 10px;
-
   font-size: 28px;
   font-weight: 400;
-
   color: #202124;
 }
 
 .description {
   margin: 0 0 28px;
-
   font-size: 15px;
   line-height: 1.5;
-
   color: #5f6368;
 }
-
-/* Languages */
 
 .languages {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
   margin-bottom: 28px;
 }
 
 .language {
   width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 14px 16px;
-
-  border: 2px solid #dadce0;
+  border: 1px solid #dadce0;
   border-radius: 6px;
-
   background: #ffffff;
-
   color: #202124;
-
   font-family: inherit;
   font-size: 15px;
-
   text-align: left;
-
   cursor: pointer;
 }
 
@@ -91,7 +70,7 @@ h2 {
 }
 
 .language.selected {
-  border-color: #8d78e2;
+  border-color: #1a73e8;
   background: #f8fbff;
 }
 
@@ -99,41 +78,170 @@ h2 {
   color: #5f6368;
 }
 
-/* Continue */
+.terms {
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
 
-.continue-button {
-  width: 100%;
+.terms p {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #5f6368;
+}
 
-  padding: 12px 20px;
+.terms p:last-child {
+  margin-bottom: 0;
+}
 
-  border: none;
-  border-radius: 4px;
-
-  background: #5741b0;
-  color: #ffffff;
-
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 200ms;
+.terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #202124;
   cursor: pointer;
 }
 
-.continue-button:hover {
-  background: #6148c7;
+.terms-check input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #1a73e8;
+  cursor: pointer;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #202124;
+}
+
+.phone-input {
+  display: flex;
+  width: 100%;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.phone-input:focus-within {
+  border-color: #1a73e8;
+}
+
+.country-code {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid #dadce0;
+  font-size: 15px;
+  color: #202124;
+  background: #f8f9fa;
+}
+
+.phone-input input {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 16px;
+  color: #202124;
+}
+
+.phone-input input::placeholder {
+  color: #80868b;
+}
+
+.input-hint {
+  margin: 8px 0 28px;
+  font-size: 13px;
+  color: #80868b;
+}
+
+.otp-input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: #202124;
+}
+
+.otp-input:focus {
+  border-color: #1a73e8;
+}
+
+.otp-input::placeholder {
+  color: #80868b;
+  letter-spacing: 0;
+}
+
+.error-message {
+  margin: 10px 0 20px;
+  font-size: 14px;
+  color: #d93025;
+}
+
+.continue-button {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  background: #1a73e8;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.continue-button:hover:not(:disabled) {
+  background: #1765cc;
+}
+
+.continue-button:disabled {
+  background: #dadce0;
+  color: #80868b;
+  cursor: not-allowed;
 }
 
 .step {
   margin: 24px 0 0;
-
   text-align: center;
-
   color: #80868b;
-
   font-size: 13px;
 }
 
-/* Mobile */
+.account-info {
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.account-info p {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.account-info p:last-child {
+  margin-bottom: 0;
+}
+
+.account-info strong {
+  font-weight: 500;
+  color: #5f6368;
+}
 
 @media (max-width: 480px) {
   .container {
