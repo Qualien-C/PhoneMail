@@ -145,25 +145,21 @@ const getConversation = async (req, res) => {
     const { threadId } = req.params;
     const phoneNumber = req.user.phoneNumber;
 
-    //!! First check whether the user belongs to this conversation
-    const userEmail = await Email.findOne({
+    //! Check wether user
+    const emails = await Email.find({
       threadId,
       $or: [
         { sender: phoneNumber },
         { recipients: phoneNumber },
         { cc: phoneNumber }
       ]
-    });
+    }).sort({ createdAt: 1 });
 
-    if (!userEmail) {
-      return res.status(403).json({
-        message: "You are not allowed to access this conversation"
+    if (emails.length === 0) {
+      return res.status(404).json({
+        message: "Conversation not found"
       });
     }
-
-    const emails = await Email.find({
-      threadId
-    }).sort({ createdAt: 1 });
 
     res.status(200).json({
       emails
